@@ -162,7 +162,7 @@ function handleClickShovel(e){
         }
     }
     /// If the clicked space results in the 20 nonmine spaces being clicked
-    if(clickedSquareIndexes.length === 75) {
+    if(clickedSquareIndexes.length === 85) {
         state = 'winner'
         handleWin()
     }
@@ -240,7 +240,7 @@ renderItemIcon()
 
 function getBombLocations(){
 bombLocations = []
-    while(bombLocations.length < 25){
+    while(bombLocations.length < 15){
         let rando = Math.floor(Math.random() * 100)
     if(!bombLocations.includes(rando) && rando !== firstMineLocation - 1){
         bombLocations.push(rando)
