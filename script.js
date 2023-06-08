@@ -14,6 +14,7 @@ const PICTURES = {
 }
 
 
+
 const lightGrey = 'rgb(0, 122, 122)';
 
 let board;
