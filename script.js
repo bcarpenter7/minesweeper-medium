@@ -263,6 +263,8 @@ function handleNULL(e) {
 
 
 
+
+
 //Left fill
 for(let i = 2; i < newBoard.length; i++){
 let edgeNums = [100, 90, 80, 70, 60, 50, 40, 30, 20, 10]
@@ -575,10 +577,9 @@ if(copyOfClicked.length){
     handleNULL(copyOfClicked[0])
 } else {
     console.log('end IT', copyOfClicked, clickedSquareIndexes.length, clickedSquareIndexes)
+    copyOfClicked = undefined;
     return
 }
-
-
 }
 
 
