@@ -1,4 +1,4 @@
-const mine = `<img class='hidden' id='mine' src='https://www.giantbomb.com/a/uploads/scale_medium/8/87790/3216800-icon_mine.png' height='70vmin'>`
+const mine = `<img class='' id='mine' src='https://www.giantbomb.com/a/uploads/scale_medium/8/87790/3216800-icon_mine.png' height='70vmin'>`
 // const flag = `<img id='number' src='https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Minesweeper_flag.svg/2048px-Minesweeper_flag.svg.png' height='70vmin'>`
 const PICTURES = {
     null: '',
@@ -163,6 +163,7 @@ function handleClickShovel(e){
     }
     /// If the clicked space results in the 20 nonmine spaces being clicked
     if(clickedSquareIndexes.length === 85) {
+        console.log('reached it????')
         state = 'winner'
         handleWin()
     }
@@ -524,8 +525,8 @@ for(let i = 1; i < 10; i++){
 
 
 
-
-if(clickedSquareIndexes.length >= 75) {
+/// If the win occurs on a fill
+if(clickedSquareIndexes.length >= 85) {
     state = 'winner'
     handleWin()
 }
