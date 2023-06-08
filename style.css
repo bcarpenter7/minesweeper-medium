@@ -1,0 +1,413 @@
+* {
+    margin: 0;
+    display: border-box;
+    font-family: 'Roboto', sans-serif;
+    font-weight: bolder;
+}
+
+
+body {
+    background-color: rgb(2, 12, 23);
+}
+
+
+#container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5vmin;
+    color: #282727;
+}
+
+h1 {
+    font-size: 8.5vmin;
+    margin-top: 10vmin;
+    letter-spacing: 1px;
+    color: rgb(156, 116, 199);
+}
+
+@media only screen and (min-width: 481px){
+    h1 {
+        font-size: 8vmin;
+        margin-top: 6vmin;
+        margin-bottom: -3vmin;
+    }
+}
+
+@media only screen and (min-width: 768px){
+    h1 {
+        font-size: 7vmin;
+        margin-top: 2vmin;
+        margin-bottom: -3vmin;
+    }
+}
+
+
+#message {
+    font-size: 4.5vmin;
+    margin: 0 10vmin;
+    margin-top: -1vmin;
+    color: rgb(156, 116, 199);
+}
+
+
+@media only screen and (min-width: 768px){
+    #message {
+        font-size: 3vmin;
+        margin-top: -2vmin;
+    }
+}
+
+#boardLayout {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr 1fr 1fr;
+    gap: .2vmin;
+}
+
+.numbers {
+    height: 8vmin;
+    width: 8vmin;
+}
+
+.box {
+    background-color: gray;
+    height: 8vmin;
+    width: 8vmin;
+    font-size: 7vmin;
+    text-align: center;
+    color: black;
+}
+
+.box:hover {
+    cursor: pointer;
+}
+
+
+
+@media only screen and (min-width: 481px) {
+    .box {
+        height: 7vmin;
+        width: 7vmin;
+        font-size: 6vmin;
+    }
+} 
+
+
+
+@media only screen and (min-width: 768px){
+    .box {
+        height: 5.5vmin;
+        width: 5.5vmin;
+        font-size: 4.5vmin;
+    }
+
+    .box:hover {
+    transform: scale(1.02);
+    }
+}
+
+
+.hidden {
+    opacity: 0;
+}
+
+.numberOne {
+    color: rgb(0, 70, 80);
+}
+
+.numberTwo {
+    color: rgb(81, 176, 80);
+}
+
+.numberThree {
+    color: rgb(206, 170, 61);
+}
+
+.numberFour {
+    color: rgb(156, 116, 199);
+}
+
+.numberFive {
+    color: rgb(8, 19, 52);
+}
+
+.numberSix {
+    color: #f59f00;
+}
+
+.numberSeven {
+    color: #4263eb;
+}
+
+.numberEight {
+    color: #f76707;
+}
+
+#choices {
+    display: flex;
+    align-items: center;
+}
+
+
+#flagItem {
+    z-index: 100;
+    height: 15vmin;
+}
+
+@media only screen and (min-width: 481px) {
+    #flagItem {
+       height: 7vmin;
+    }
+}
+
+@media only screen and (min-width: 768px) {
+    #flagItem {
+       height: 8vmin;
+    }
+}
+
+#shovelItem {
+    height: 15vmin;
+    padding: 2.85vmin;
+}
+
+@media only screen and (min-width: 481px) {
+    #shovelItem {
+      height: 7vmin;
+      padding: 1vmin;  
+
+    }
+}
+
+@media only screen and (min-width: 768px) {
+    #shovelItem {
+      height: 8vmin;
+      /* padding: 1vmin;   */
+    }
+}
+
+#choice-holder {
+    display: flex;
+    flex-direction: row;
+    gap: 3vmin;
+}
+
+@media only screen and (min-width: 481px) {
+    #choice-holder {
+        height: 13vmin;
+        margin-top: -3vmin;
+    }
+}
+
+@media only screen and (min-width: 768px) {
+    #choice-holder {
+        height: 12vmin;
+        margin-top: -3vmin;
+    }
+}
+
+#choiceShovel {
+    text-align: center;
+    border-radius: 4px;
+    padding: 1vmin;
+}
+
+#choiceShovel:hover {
+    cursor: pointer;
+}
+
+@media only screen and (min-width: 481px) {
+    #choiceShovel {
+        padding: 1.5vmin;
+    }
+}
+
+@media only screen and (min-width: 768px) {
+    #choiceShovel {
+        padding: 1vmin;
+    }
+}
+
+#choiceFlag {
+    text-align: center;
+    border-radius: 4px;
+    padding: 4vmin;
+    align-items: center;
+}
+
+#choiceFlag:hover {
+    cursor: pointer;
+}
+
+@media only screen and (min-width: 481px) {
+    #choiceFlag {
+     padding: 2vmin;
+    }
+}
+
+.currentChoice {
+    background-color:rgb(206, 170, 61); 
+}
+
+.notChoice{
+    border: none;
+    background-color: gray;
+}
+
+#reset {
+    color:rgb(0, 70,80);
+    background-color: rgb(0, 122, 122);
+    border-radius: 100px;
+    font-size: 6vmin;
+    padding: 2vmin;
+}
+
+#reset:hover {
+    cursor:pointer;
+}
+
+#mine {
+    height: 8vmin;
+}
+
+
+
+
+
+@media only screen and (max-width: 410px) {
+    #reset {
+        font-size: 3vmin;
+        padding: 2vmin;
+        margin-top: -2vmin;
+    }
+    #mine {
+        height: 8vmin;
+    } 
+
+    #number {
+        height: 8vmin;
+    }
+
+}
+
+@media only screen and (min-width: 410px) {
+    #reset {
+        font-size: 3vmin;
+        padding: 2vmin;
+        margin-top: -2vmin;
+    }
+    #mine {
+        height: 8vmin;
+    } 
+
+    #number {
+        height: 8vmin;
+    }
+
+}
+
+@media only screen and (min-width: 481px) {
+    #reset {
+        font-size: 3vmin;
+        padding: 2vmin;
+        margin-top: -2vmin;
+    }
+    #mine {
+        height: 7vmin;
+    } 
+
+    #number {
+        height: 7vmin;
+    }
+
+    .numbers {
+        height: 7vmin;
+        width: 7vmin;
+    }
+}
+
+
+@media only screen and (min-width: 768px) {
+    #reset {
+        font-size: 3vmin;
+        padding: 1vmin;
+        margin-top: -3vmin;
+    }
+    /* controls flag size on mine spot */
+    #mine {
+        height: 5.5vmin;
+    } 
+    /* controls flag size on number spot */
+    #number {
+        height: 5.5vmin;
+    }
+
+    .numbers {
+        height: 5.5vmin;
+        width: 5.5vmin;
+    }
+}
+
+
+.bombAction {
+    animation-duration: 1s;
+    background-color: none;
+    animation-name: endGame;
+}
+
+@keyframes endGame {
+    from {
+        transform: rotate(0deg)
+    }
+    10% {
+        transform: rotate(2deg);
+    } 
+    20% {
+        transform: rotate(-2deg);
+    } 
+    30% {
+        transform: rotate(2deg);
+    } 
+    40% {
+        transform: rotate(-2deg);
+    } 
+    50% {
+        transform: rotate(2deg);
+    } 
+    60% {
+        transform: rotate(-2deg);
+    } 
+    70% {
+        transform: rotate(2deg);
+    } 
+    to {
+        transform: rotate(-2deg);
+
+    }
+    
+}
+
+#links {
+    display: flex;
+    margin-top: -1vmin;
+    margin-bottom: 3vmin;
+    flex-direction: row;
+    gap: 7vmin;
+    font-size: 4vmin;
+    color:rgb(0, 70,80);
+    text-decoration: none;
+}
+
+#links > button {
+    color:rgb(0, 70,80);
+    background-color: rgb(0, 122, 122);
+    padding: 2vmin;
+    border-radius: 5px;
+    text-decoration: none;
+}
+
+#links > button > a {
+    text-decoration: none;
+    color: inherit;
+}
