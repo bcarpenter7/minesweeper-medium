@@ -394,7 +394,7 @@ h1 {
     margin-bottom: 3vmin;
     flex-direction: row;
     gap: 7vmin;
-    font-size: 4vmin;
+    font-size: 9vmin;
     color:rgb(0, 70,80);
     text-decoration: none;
 }
@@ -402,7 +402,7 @@ h1 {
 #links > button {
     color:rgb(0, 70,80);
     background-color: rgb(0, 122, 122);
-    padding: 2vmin;
+    padding: .5vmin;
     border-radius: 5px;
     text-decoration: none;
 }
@@ -410,4 +410,5 @@ h1 {
 #links > button > a {
     text-decoration: none;
     color: inherit;
+    font-size: 2.5vmin;
 }
