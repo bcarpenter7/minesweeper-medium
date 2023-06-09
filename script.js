@@ -117,6 +117,7 @@ function handleClickChoice(e){
 
 function handleClickShovel(e){
     let choiceId = e.target
+    if(choiceId.id === 'boardLayout') return
     if(state === 'loss' || state === 'winner') return
     if(choiceId.src === 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Minesweeper_flag.svg/2048px-Minesweeper_flag.svg.png') return
     if(choiceOfItem === 'flag') return
