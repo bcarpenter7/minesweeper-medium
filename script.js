@@ -1,5 +1,4 @@
 const mine = `<img class='hidden' id='mine' src='https://www.giantbomb.com/a/uploads/scale_medium/8/87790/3216800-icon_mine.png' height='70vmin'>`
-// const flag = `<img id='number' src='https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Minesweeper_flag.svg/2048px-Minesweeper_flag.svg.png' height='70vmin'>`
 const PICTURES = {
     null: '',
     mine: mine,
@@ -13,8 +12,6 @@ const PICTURES = {
     8: `<p class='hidden numbers'>8</p>`,
 }
 
-
-
 const lightGrey = 'rgb(0, 122, 122)';
 
 let board;
@@ -24,7 +21,7 @@ let state;
 let choiceOfItem;
 let firstClickLocation;
 let firstMineLocation;
-let copyOfClicked;
+let beenChecked;
 
 ///Cached elements
 const reset = document.getElementById('reset')
@@ -65,9 +62,9 @@ state = 'playing'
 document.querySelectorAll('.box').forEach(e => e.style.backgroundColor = 'gray')
 message.innerText = 'Avoid digging the hidden mines!'
 clickedSquareIndexes = [];
-copyOfClicked = undefined;
 choiceOfItem = 'shovel';
 firstClickLocation = [];
+beenChecked = [];
 render()
 }
 
@@ -80,9 +77,7 @@ function render(){
 
 function renderBoard(){
     handleBombLocations()
-
     for(let i = 0; i <= board.flat().length - 1; i++){
-       
       let boardLocations = document.querySelector(`#boardLayout :nth-child(${i + 1})`)
         boardLocations.innerHTML = PICTURES[board.flat()[i]]
     }
@@ -122,11 +117,22 @@ function handleClickShovel(e){
     if(choiceId.src === 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Minesweeper_flag.svg/2048px-Minesweeper_flag.svg.png') return
     if(choiceOfItem === 'flag') return
     /// If a bomb is chosen on the first turn, the board is rerendered and then the target is changed to match the target of that current location now
-    if(choiceId.id === 'mine' && firstClickLocation.length < 1){
+    if(choiceId.id === 'mine' && firstClickLocation.length < 1 || board.flat()[choiceId.id] !== null && firstClickLocation < 1){
+        console.log('happening')
         firstMineLocation = choiceId.parentNode.id
         render()
         choiceId = document.getElementById(firstMineLocation)
+        ///// This while loops makes the board rerender until you can get a flood start, also prevents rendering a bomb under you twice
+        while(board.flat()[choiceId.id] !== null){
+            render()
+        }
+        console.log(choiceId, 'THIS IS WHAT MATTERS', firstMineLocation, choiceId.parentNode.id, board.flat()[choiceId.id])
     }
+
+
+
+
+
     firstClickLocation = choiceId.parentNode.id
     choiceId.classList.remove('hidden');
     choiceId.style.backgroundColor = lightGrey;
@@ -145,7 +151,7 @@ function handleClickShovel(e){
    if(choiceId.tagName === 'DIV' && choiceId.classList[1] !== undefined){
             //// Guard clause prevents clicking on a 'P' element once it has been autofilled
              if(clickedSquareIndexes.indexOf(Number(choiceId.id)) > -1) return
-        choiceId.innerText = board.flat()[firstMineLocation - 1]  
+        choiceId.innerText = board.flat()[firstMineLocation]  
     } else if(choiceId.tagName === 'DIV'){
         handleNULL(choiceId)
         if(clickedSquareIndexes.indexOf(Number(choiceId.id)) < 0){
@@ -157,15 +163,12 @@ function handleClickShovel(e){
     /// If a shovel hits a number space
     if(choiceId.tagName === 'P'){
         choiceId.style.backgroundColor = lightGrey;
-        console.log(clickedSquareIndexes.length, 'clickedSquareIndexes', Number(choiceId.parentNode.id), 'checkHere')
         if(clickedSquareIndexes.indexOf(Number(choiceId.parentNode.id)) < 0){
             clickedSquareIndexes.push(Number(choiceId.parentNode.id))
-            console.log(clickedSquareIndexes, 'updated CSI')
         }
     }
     /// If the clicked space results in the 20 nonmine spaces being clicked
     if(clickedSquareIndexes.length === 85) {
-        console.log('reached it????')
         state = 'winner'
         handleWin()
     }
@@ -205,15 +208,12 @@ if(e.target.style.backgroundColor === lightGrey) return //// if it has already b
     }
 
 
-function handleLoss(id){
+function handleLoss(currentMine){
 message.innerText = 'You Lose!'
-/// Reveals bombs after loss
+/// Reveals bombs after loss, then adds animation to clicked
 document.querySelectorAll('.hidden').forEach(e => e.classList.remove('hidden'))
-id.classList.add('bombAction')
-// document.querySelectorAll('#mine').forEach(e => e.classList.add('bombAction'))
+currentMine.classList.add('bombAction')
 setTimeout(() => document.querySelectorAll('#mine').forEach(e => e.src = 'https://www.freepnglogos.com/uploads/explosion/clipart-starburst-explosion-comic-vector-png-transparent-5.png'), 1000)
-// setTimeout(() => document.querySelectorAll('#mine').forEach(e => e.src = 'https://w7.pngwing.com/pngs/102/643/png-transparent-desktop-comic-explosion-miscellaneous-photography-computer.png'), 1000);
-console.log(document.querySelectorAll('#mine').classList)
 }
 
 
@@ -248,81 +248,78 @@ bombLocations = []
     if(!bombLocations.includes(rando) && rando !== firstMineLocation - 1){
         bombLocations.push(rando)
     }
-    console.log(bombLocations, board.flat())
 }
 }
 
 
-function handleNULL(e) {
-    console.log(copyOfClicked)
-    console.log('CURRENT IDX', e, Number(e.id))
-    let newBoard = board.flat()
-    let idx = Number(e.id) ? Number(e.id) : e
-    if(clickedSquareIndexes.indexOf(idx) < 0){
-        clickedSquareIndexes.push(idx)
-        console.log(clickedSquareIndexes, 'bruv')
-    }
-
-
-
-
-
-//Left fill
-for(let i = 2; i < newBoard.length; i++){
-let edgeNums = [100, 90, 80, 70, 60, 50, 40, 30, 20, 10]
-let indexForNewBoard = idx - i 
-let indexForDOM = idx - i + 1
-let currentElem = document.getElementById(`${indexForDOM}`)
-
-    if(typeof(newBoard[indexForNewBoard]) === 'number' && edgeNums.indexOf(indexForDOM) < 0){
+function elementChangeFill (currentElem, newBoard, indexForNewBoard) {
     currentElem.style.backgroundColor = lightGrey
     currentElem.classList.remove('hidden');
     currentElem.innerText = newBoard[indexForNewBoard]
-    if(clickedSquareIndexes.indexOf(Number(indexForDOM)) < 0){
-        clickedSquareIndexes.push(Number(indexForDOM))
-        }
-    break;
-    } else if(newBoard[indexForNewBoard] !== null || edgeNums.indexOf(indexForDOM) > -1 || idx - 1 < 0){
-    break;
-    } else {
-        document.getElementById(`${indexForDOM}`).style.backgroundColor = lightGrey
-        if(clickedSquareIndexes.indexOf(Number(indexForDOM)) < 0){
-        clickedSquareIndexes.push(Number(indexForDOM))
-        console.log(clickedSquareIndexes, 'leftfill')
-        }
-    }
-
 }
 
-console.log(e, idx, newBoard[idx], 'WHERE DID I CLICK')
+function pushClickSquare(indexForNewBoard){
+    if(clickedSquareIndexes.indexOf(indexForNewBoard) < 0){
+        clickedSquareIndexes.push(Number(indexForNewBoard))
+    }
+}
+
+
+
+
+function handleNULL(e) {
+    let newBoard = board.flat()
+    let idx = Number(e.id) > -1 ? Number(e.id) : e
+
+///
+beenChecked.push(idx)
+///
+
+    if(clickedSquareIndexes.indexOf(idx) < 0){
+        clickedSquareIndexes.push(idx)
+    }
+
+let rightSideNums = [99, 89, 79, 69, 59, 49, 39, 29, 19, 9]
+let leftSideNums = [90, 80, 70, 60, 50, 40, 30, 20, 10, 0]
+
+
+//Left fill
+for(let i = 1; i < newBoard.length; i++){
+    let indexForNewBoard = idx - i 
+    let currentElem = document.getElementById(`${indexForNewBoard}`)
+
+if(typeof(newBoard[indexForNewBoard]) === 'number' && rightSideNums.indexOf(indexForNewBoard) < 0){
+    elementChangeFill(currentElem, newBoard, indexForNewBoard)
+    pushClickSquare(indexForNewBoard)
+break;
+} else if(newBoard[indexForNewBoard] !== null || rightSideNums.indexOf(indexForNewBoard) > -1 || idx - 1 < 0){
+break;
+} else {
+    document.getElementById(`${indexForNewBoard}`).style.backgroundColor = lightGrey
+    pushClickSquare(indexForNewBoard)
+}
+}
 
 // Right fill
 
-for(let i = 0; i < newBoard.length; i++){
-let edgeNums = [100, 90, 80, 70, 60, 50, 40, 30, 20, 10]
-let indexForNewBoard = idx + i
-let indexForDOM = idx + i + 1
-let currentElem = document.getElementById(`${indexForDOM}`)
-console.log(edgeNums.indexOf(idx + i) < 0, 'is it true', idx + i)
-    if(typeof(newBoard[indexForNewBoard]) === 'number' && edgeNums.indexOf(indexForNewBoard) < 0){
-        currentElem.style.backgroundColor = lightGrey
-        currentElem.classList.remove('hidden');
-        currentElem.innerText = board.flat()[indexForNewBoard]
-        if(clickedSquareIndexes.indexOf(Number(indexForDOM)) < 0){
-            clickedSquareIndexes.push(Number(indexForDOM))
-            console.log(clickedSquareIndexes, 'this innnn')
+    /// i equals 0 to skip the actual clicked on element
+    for(let i = 1; i < newBoard.length; i++){
+        let indexForNewBoard = idx + i
+        let currentElem = document.getElementById(`${indexForNewBoard}`)
+
+        if(typeof(newBoard[indexForNewBoard]) === 'number' && leftSideNums.indexOf(indexForNewBoard) < 0){
+            elementChangeFill(currentElem, newBoard, indexForNewBoard)
+            pushClickSquare(indexForNewBoard)
+            break;
+        /// This makes the cleaning stop if it reaches a mine || if it reaches a leftSideNums index
+        } else if(newBoard[indexForNewBoard] !== null || leftSideNums.indexOf(indexForNewBoard) > -1){
+                break;
         }
-        break;
-    } else if(newBoard[indexForNewBoard] !== null || edgeNums.indexOf(idx) > -1){
-    break;
-    } else {
-        document.getElementById(`${indexForDOM}`).style.backgroundColor = lightGrey
-        console.log(indexForDOM, idx + 1, 'indexds')
-        if(clickedSquareIndexes.indexOf(indexForDOM) < 0){
-            clickedSquareIndexes.push(Number(indexForDOM))
-            console.log(clickedSquareIndexes, 'rightfill')
-            }
-    }
+        /// This makes the null tiles clear
+         else {
+            document.getElementById(`${indexForNewBoard}`).style.backgroundColor = lightGrey
+            pushClickSquare(indexForNewBoard)
+        }
 
 }
 
@@ -332,63 +329,47 @@ console.log(edgeNums.indexOf(idx + i) < 0, 'is it true', idx + i)
 
 
 for(let i = 1; i < 10; i++){
- let indexForNewBoard = idx - (10 * i) - 1
- let indexForDOM = idx - (10 * i)
- let currentElem = document.getElementById(`${indexForDOM}`)
-    
-    if(typeof(newBoard[indexForNewBoard]) === 'number'){
-        currentElem.style.backgroundColor = lightGrey
-        currentElem.classList.remove('hidden');
-        currentElem.innerText = newBoard[indexForNewBoard]
-        console.log(currentElem, "TOP TOP TOP ")
-        if(clickedSquareIndexes.indexOf(Number(indexForDOM)) < 0){
-            clickedSquareIndexes.push(Number(indexForDOM))
-            console.log(clickedSquareIndexes, 'this innnn')
-        }
-        break;
-    } else if(newBoard[indexForNewBoard] !== null){
-    break;
-    } else if (newBoard[indexForNewBoard] === null){
-        currentElem.style.backgroundColor = lightGrey
-        if(clickedSquareIndexes.indexOf(Number(indexForDOM)) < 0){
-            clickedSquareIndexes.push(Number(indexForDOM))
-            console.log(clickedSquareIndexes, 'clickedSquareIndexes')
-            }
-        console.log(clickedSquareIndexes, 'topfill')
-    }
-
-}
+    let indexForNewBoard = idx - (10 * i)
+    let currentElem = document.getElementById(`${indexForNewBoard}`)
+       
+       if(typeof(newBoard[indexForNewBoard]) === 'number'){
+           elementChangeFill(currentElem, newBoard, indexForNewBoard)
+           pushClickSquare(indexForNewBoard)
+           break;
+       } else if(newBoard[indexForNewBoard] !== null){
+       break;
+       } else if (newBoard[indexForNewBoard] === null){
+           currentElem.style.backgroundColor = lightGrey
+           pushClickSquare(indexForNewBoard)
+       }
+   
+   }
 
 
 //Top Right fill
 for(let i = 1; i < 10; i++){
-let edgeNums = [100, 90, 80, 70, 60, 50, 40, 30, 20, 10]
-let floodNums = [91, 81, 71, 61, 51, 41, 31, 21, 11, 1]
-let indexForNewBoard = idx - (10 * i)
-let indexForDOM = idx - (10 * i) + 1
-let currentElem = document.getElementById(`${indexForDOM}`)
-    if(typeof(newBoard[indexForNewBoard]) === 'number' && floodNums.indexOf(indexForDOM) < 0){
-        currentElem.style.backgroundColor = lightGrey
-        currentElem.classList.remove('hidden');
-        currentElem.innerText = board.flat()[idx - (10 * i)]
-        console.log(currentElem, "TOP RIGHT FILL ")
-        if(clickedSquareIndexes.indexOf(Number(indexForDOM)) < 0){
-            clickedSquareIndexes.push(Number(indexForDOM))
-            console.log(clickedSquareIndexes, 'this innnn')
-        }
+    let indexForNewBoard = idx - (10 * i) + i
+    let currentElem = document.getElementById(`${indexForNewBoard}`)
+    
+     /// Should not even try to check to the right if on the edge
+     if(rightSideNums.indexOf(idx) > -1 || leftSideNums.indexOf(indexForNewBoard) > -1){
         break;
-    } else if(newBoard[idx - (10 * i)] !== null  || edgeNums.indexOf(idx) > -1){
-    break;
-    } else if (newBoard[idx - (10 * i)] === null){
-        currentElem.style.backgroundColor = lightGrey
-        if(clickedSquareIndexes.indexOf(Number(indexForDOM)) < 0){
-            clickedSquareIndexes.push(Number(indexForDOM))
-            console.log(clickedSquareIndexes, 'top right dia')
-            }
-        console.log(clickedSquareIndexes.length, 'clickedSquareIndexes')
     }
-
-}
+    
+    
+        if(typeof(newBoard[indexForNewBoard]) === 'number' && leftSideNums.indexOf(indexForNewBoard) < 0){
+            elementChangeFill(currentElem, newBoard, indexForNewBoard)
+            pushClickSquare(indexForNewBoard)
+            break;
+        } else if(newBoard[idx - (10 * i)] !== null  || rightSideNums.indexOf(idx) > -1){
+        break;
+        } else if (newBoard[idx - (10 * i)] === null){
+            currentElem.style.backgroundColor = lightGrey
+            pushClickSquare(indexForNewBoard)
+        }
+    
+    }
+    
 
 
 
@@ -396,33 +377,27 @@ let currentElem = document.getElementById(`${indexForDOM}`)
 
 //Top left fill
 for(let i = 1; i < 10; i++){
-let edgeNums = [91, 81, 71, 61, 51, 41, 31, 21, 11, 1]
-let floodNums = [100, 90, 80, 70, 60, 50, 40, 30, 20, 10]
-let indexForNewBoard = idx - (10 * i) - 2
-let indexForDOM = idx - (10 * i) - 1
-let currentElem = document.getElementById(`${indexForDOM}`)
-
-if(typeof(newBoard[indexForNewBoard]) === 'number' && floodNums.indexOf(indexForDOM) < 0){
-    currentElem.style.backgroundColor = lightGrey
-    currentElem.classList.remove('hidden');
-    currentElem.innerText = board.flat()[indexForNewBoard]
-    console.log(currentElem, "TOP LEFT FILL ")
-    if(clickedSquareIndexes.indexOf(Number(indexForDOM)) < 0){
-        clickedSquareIndexes.push(Number(indexForDOM))
-        console.log(clickedSquareIndexes, 'this innnn')
+    let indexForNewBoard = idx - (10 * i) - i
+    let currentElem = document.getElementById(`${indexForNewBoard}`)
+    
+     /// Should not even try to check to the right if on the edge
+     if(leftSideNums.indexOf(idx) > -1 || rightSideNums.indexOf(indexForNewBoard) > -1){
+    break;
     }
-    break;
-} else if(newBoard[indexForNewBoard] !== null || edgeNums.indexOf(idx) > -1){
-    break;
+    
+    
+    if(typeof(newBoard[indexForNewBoard]) === 'number' && rightSideNums.indexOf(indexForNewBoard) < 0){
+        elementChangeFill(currentElem, newBoard, indexForNewBoard)
+            pushClickSquare(indexForNewBoard)
+        break;
+    } else if(newBoard[indexForNewBoard] !== null || leftSideNums.indexOf(idx) > -1){
+        break;
     } else if (newBoard[indexForNewBoard] === null){
-        currentElem.style.backgroundColor = lightGrey
-        if(clickedSquareIndexes.indexOf(Number(indexForDOM)) < 0){
-            clickedSquareIndexes.push(Number(indexForDOM))
-            console.log(clickedSquareIndexes, 'top left dia')
-            }
+            currentElem.style.backgroundColor = lightGrey
+            pushClickSquare(indexForNewBoard)
+        }
+    
     }
-
-}
 
 
 
@@ -430,99 +405,67 @@ if(typeof(newBoard[indexForNewBoard]) === 'number' && floodNums.indexOf(indexFor
 
 //Bottom fill
 for(let i = 1; i < 10; i++){
-let indexForNewBoard = idx + (10 * i) - 1;
-let indexForDOM = idx + (10 * i)
-let currentElem = document.getElementById(`${indexForDOM}`)
-
-if(typeof(newBoard[indexForNewBoard]) === 'number'){
-    currentElem.style.backgroundColor = lightGrey
-    currentElem.classList.remove('hidden');
-    currentElem.innerText = newBoard[indexForNewBoard]
-    console.log(currentElem, "Bottom FILL ")
-    if(clickedSquareIndexes.indexOf(Number(indexForDOM)) < 0){
-        clickedSquareIndexes.push(Number(indexForDOM))
-        console.log(clickedSquareIndexes, 'this innnn')
-    }
-    break;
-} else if(newBoard[indexForNewBoard] !== null){
-    break;
+    let indexForNewBoard = idx + (10 * i);
+    let currentElem = document.getElementById(`${indexForNewBoard}`)
+    
+    if(typeof(newBoard[indexForNewBoard]) === 'number'){
+        elementChangeFill(currentElem, newBoard, indexForNewBoard)
+        pushClickSquare(indexForNewBoard)
+        break;
+    } else if(newBoard[indexForNewBoard] !== null){
+        break;
     } else if (newBoard[indexForNewBoard] === null){
         currentElem.style.backgroundColor = lightGrey
-        if(clickedSquareIndexes.indexOf(Number(indexForDOM)) < 0){
-            clickedSquareIndexes.push(Number(indexForDOM))
-            console.log(clickedSquareIndexes, 'bottom fill')
-            }
-
+        pushClickSquare(indexForNewBoard)
+        }
     }
-}
-
-
-
-
-
-
+    
 
 
 //Bottom Left Dia fill
 for(let i = 1; i < 10; i++){
-    let indexForNewBoard = idx + (10 * i) - 2
-    let indexForDOM = idx + (10 * i) - 1
-    let currentElem = document.getElementById(`${indexForDOM}`)
-    let edgeNums = [91, 81, 71, 61, 51, 41, 31, 21, 11, 1]
-    let floodNums = [100, 90, 80, 70, 60, 50, 40, 30, 20, 10]
+    let indexForNewBoard = idx + (10 * i) - i
+    let currentElem = document.getElementById(`${indexForNewBoard}`)
+
+    /// Should not even try to check to the right if on the edge
+        if(leftSideNums.indexOf(idx) > -1 || rightSideNums.indexOf(indexForNewBoard) > -1){
+     break;
+    }
 
 
-
-    if(typeof(newBoard[indexForNewBoard]) === 'number' && floodNums.indexOf(indexForDOM) < 0){
-        currentElem.style.backgroundColor = lightGrey
-        currentElem.classList.remove('hidden');
-        currentElem.innerText = newBoard[indexForNewBoard]
-        console.log(currentElem, "Bottom DIA FILL ")
-        if(clickedSquareIndexes.indexOf(Number(indexForDOM)) < 0){
-            clickedSquareIndexes.push(Number(indexForDOM))
-            console.log(clickedSquareIndexes, 'this innnn')
-        }
+    if(typeof(newBoard[indexForNewBoard]) === 'number' && rightSideNums.indexOf(indexForNewBoard) < 0){
+        elementChangeFill(currentElem, newBoard, indexForNewBoard)
+        pushClickSquare(indexForNewBoard)
         break;
-    } else if(newBoard[indexForNewBoard] !== null || edgeNums.indexOf(idx) > -1){
+    } else if(newBoard[indexForNewBoard] !== null || leftSideNums.indexOf(idx) > -1){
     break;
     } else if (newBoard[indexForNewBoard] === null){
         currentElem.style.backgroundColor = lightGrey
-        if(clickedSquareIndexes.indexOf(Number(indexForDOM)) < 0){
-            clickedSquareIndexes.push(Number(indexForDOM))
-            console.log(clickedSquareIndexes, 'bottom left dia fill')
-            }
+        pushClickSquare(indexForNewBoard)
     }
 }
 
 
 //Bottom Right Dia fill
 for(let i = 1; i < 10; i++){
-    let edgeNums = [100, 90, 80, 70, 60, 50, 40, 30, 20, 10]
-    let floodNums = [91, 81, 71, 61, 51, 41, 31, 21, 11, 1]
-    let indexForNewBoard = idx + (10 * i)
-    let indexForDOM = idx + (10 * i) + 1
-    let currentElem = document.getElementById(`${indexForDOM}`)
+    let indexForNewBoard = idx + (10 * i) + i
+    let currentElem = document.getElementById(`${indexForNewBoard}`)
 
-
-    if(typeof(newBoard[indexForNewBoard]) === 'number' && floodNums.indexOf(indexForDOM) < 0){
-        currentElem.style.backgroundColor = lightGrey
-        currentElem.classList.remove('hidden');
-        currentElem.innerText = newBoard[indexForNewBoard]
-        console.log(currentElem, "Bottom Right Dia FILL ")
-        if(clickedSquareIndexes.indexOf(Number(indexForDOM)) < 0){
-            clickedSquareIndexes.push(Number(indexForDOM))
-            console.log(clickedSquareIndexes, 'this innnn')
-        }
+    /// Should not even try to check to the right if on the edge
+    if(rightSideNums.indexOf(idx) > -1 || leftSideNums.indexOf(indexForNewBoard) > -1){
         break;
-    } else if(newBoard[indexForNewBoard] !== null || edgeNums.indexOf(idx) > -1){
+    }
+
+
+    if(typeof(newBoard[indexForNewBoard]) === 'number' && leftSideNums.indexOf(indexForNewBoard) < 0){
+        elementChangeFill(currentElem, newBoard, indexForNewBoard)
+        pushClickSquare(indexForNewBoard)
+        break;
+    } else if(newBoard[indexForNewBoard] !== null || rightSideNums.indexOf(idx) > -1){
     break;
-    } else if (newBoard[indexForNewBoard] === null){
+    } else if (newBoard[indexForNewBoard] === null ){
         currentElem.style.backgroundColor = lightGrey
-        if(clickedSquareIndexes.indexOf(Number(indexForDOM)) < 0){
-            clickedSquareIndexes.push(Number(indexForDOM))
-            console.log(clickedSquareIndexes, 'bottom right dia')
-            }
-        console.log(clickedSquareIndexes.length, 'clickedSquareIndexes')
+        pushClickSquare(indexForNewBoard)
     }
 }
 
@@ -535,61 +478,17 @@ if(clickedSquareIndexes.length >= 85) {
     handleWin()
 }
 
-console.log(copyOfClicked, 'COPDSYDF')
+/// recursive handleNULL function
 
-if(copyOfClicked === undefined){
-/// Only happens first time
-copyOfClicked = clickedSquareIndexes.slice(0)
-////Makes sure to skip any non nulls
-while(newBoard[copyOfClicked[0] - 1] !== null && copyOfClicked.length > 0){
-    console.log(copyOfClicked, 'before')
-    copyOfClicked.shift()
-    console.log(copyOfClicked, 'after')
-}
-handleNULL(copyOfClicked[0])
-} else if(copyOfClicked === []){
-    return
-} else {
-    console.log('actual value', newBoard[copyOfClicked[0] - 1])
-    console.log(copyOfClicked, 'COPY OF CLICKED', copyOfClicked[0], newBoard, newBoard[copyOfClicked[0] - 1])
-    // Gets rid of first element in copyOfClicked each iteration
-    copyOfClicked.shift()
-    while(newBoard[copyOfClicked[0] - 1] !== null && copyOfClicked.length > 0){
-        console.log(copyOfClicked, 'before')
-        copyOfClicked.shift()
-        console.log(copyOfClicked, 'after')
+for(let i=0; i < clickedSquareIndexes.length; i++){
+    console.log(beenChecked, 'beenChecked')
+    console.log(newBoard[clickedSquareIndexes[i]] === null, beenChecked.indexOf(clickedSquareIndexes[i]), clickedSquareIndexes[i])
+    if(newBoard[clickedSquareIndexes[i]] === null && beenChecked.indexOf(clickedSquareIndexes[i]) < 0){
+        handleNULL(clickedSquareIndexes[i])
     }
-    console.log(copyOfClicked, 'COPY OF CLICKED', copyOfClicked[0], newBoard)
-}
 
-
-
-let curLastEl = copyOfClicked[copyOfClicked.length - 1]
-
-if(copyOfClicked.length > 0){
-    
-    let addition = clickedSquareIndexes.slice(clickedSquareIndexes.indexOf(curLastEl))
-    console.log(curLastEl, addition, copyOfClicked, clickedSquareIndexes, 'dis is the new one that we are all looking')
-    copyOfClicked = [...copyOfClicked, ...addition]
-}
-
-//// Calls handleNULL if their are elements left, else ends it
-if(copyOfClicked.length){
-    console.log('works')
-    handleNULL(copyOfClicked[0])
-} else {
-    console.log('end IT', copyOfClicked, clickedSquareIndexes.length, clickedSquareIndexes)
-    copyOfClicked = undefined;
-    return
 }
 }
-
-
-
-
-
-
-
 
 
 function handleBombLocations(){
@@ -726,53 +625,50 @@ for(let i = 0; i< board.length; i++){
   
 }
 }
-console.log('flattendBoard', board.flat().length, board.flat())
 renderNumberColor(board.flat())
 }
 
 
 function renderNumberColor(flattenedBoard){
-
     /// Clears old classlist
     for(let i = 0; i< flattenedBoard.length; i++){
         if(flattenedBoard[i] || flattenedBoard[i]=== null){
-            document.getElementById(i + 1).classList.remove('numberOne')
-            document.getElementById(i + 1).classList.remove('numberTwo')
-            document.getElementById(i + 1).classList.remove('numberThree')
-            document.getElementById(i + 1).classList.remove('numberFour')
-            document.getElementById(i + 1).classList.remove('numberFive')
-            document.getElementById(i + 1).classList.remove('numberSix')
-            document.getElementById(i + 1).classList.remove('numberSeven')
-            document.getElementById(i + 1).classList.remove('numberEight')
-            
+            document.getElementById(i).classList.remove('numberOne')
+            document.getElementById(i).classList.remove('numberTwo')
+            document.getElementById(i).classList.remove('numberThree')
+            document.getElementById(i).classList.remove('numberFour')
+            document.getElementById(i).classList.remove('numberFive')
+            document.getElementById(i).classList.remove('numberSix')
+            document.getElementById(i).classList.remove('numberSeven')
+            document.getElementById(i).classList.remove('numberEight')
             }
     }
     
     /// Adds color based on numbers
     for(let i = 0; i < flattenedBoard.length; i++){
         if(flattenedBoard[i] === 1){
-            document.getElementById(i + 1).classList.add('numberOne')
+            document.getElementById(i).classList.add('numberOne')
         }
         if(flattenedBoard[i] === 2){
-            document.getElementById(i + 1).classList.add('numberTwo')
+            document.getElementById(i).classList.add('numberTwo')
         }
         if(flattenedBoard[i] === 3){
-            document.getElementById(i + 1).classList.add('numberThree')
+            document.getElementById(i).classList.add('numberThree')
         }
         if(flattenedBoard[i] === 4){
-            document.getElementById(i + 1).classList.add('numberFour')
+            document.getElementById(i).classList.add('numberFour')
         }
         if(flattenedBoard[i] === 5){
-            document.getElementById(i + 1).classList.add('numberFive')
+            document.getElementById(i).classList.add('numberFive')
         }
         if(flattenedBoard[i] === 6){
-            document.getElementById(i + 1).classList.add('numberSix')
+            document.getElementById(i).classList.add('numberSix')
         }
         if(flattenedBoard[i] === 7){
-            document.getElementById(i + 1).classList.add('numberSeven')
+            document.getElementById(i).classList.add('numberSeven')
         }
         if(flattenedBoard[i] === 8){
-            document.getElementById(i + 1).classList.add('numberEight')
+            document.getElementById(i).classList.add('numberEight')
         }
 
     }
